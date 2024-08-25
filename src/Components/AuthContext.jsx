@@ -13,6 +13,7 @@ export function useAuth() {
 
 function AuthWrapper({ children }) {
     const [userData, setUserData] = useState(null);
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
         // check kr rahe ho if you have logged in before
         // kuch bhi change -> yha update ho jaayega 
@@ -21,22 +22,27 @@ function AuthWrapper({ children }) {
                 const docRef = doc(db, "users", currentUser?.uid);
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
-                    const { uid, photoURL, displayName, email } = docSnap.data();
+                    const {profile_pic, email,name } = docSnap.data();
+                    console.log("26", docSnap.data());
                     // context me jaake save kr dia hai user ka data
                     setUserData({
-                        id: uid,
-                        profile_pic: photoURL,
+                        id: currentUser?.uid,
+                        profile_pic: profile_pic,
                         email,
-                        name: displayName
+                        name
                     });
-                    console.log("userData Added");
                 }
             }
+            setLoading(false);
         })
     }, [])
 
-    console.log("userData", userData);
-    return <AuthContext.Provider value={{ setUserData, userData }}>
+    console.log("userData authcontext", userData);
+    return <AuthContext.Provider value={{
+        setUserData, userData, loading
+
+
+    }}>
         {children}
     </AuthContext.Provider>
 }
