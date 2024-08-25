@@ -7,7 +7,7 @@ function ProtectedRoute(props) {
     console.log("user Data", userData)
     const children = props.children;
     if (loading) {
-        return <div className="h-screen w-screen flex items-center justify-center bg-[#eff2f5]">
+        return <div className="h-screen w-screen flex items-center justify-center bg-background">
             <Loader2Icon className="w-8 h-8 animate-spin" />
         </div>
     }

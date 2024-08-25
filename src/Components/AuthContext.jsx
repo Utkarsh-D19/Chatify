@@ -1,4 +1,4 @@
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import React, { useContext, useEffect, useState } from "react";
 import { auth, db } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -36,13 +36,13 @@ function AuthWrapper({ children }) {
             setLoading(false);
         })
     }, [])
+    const logout =  () => {
+        signOut(auth);
+    };
 
     console.log("userData authcontext", userData);
     return <AuthContext.Provider value={{
-        setUserData, userData, loading
-
-
-    }}>
+        setUserData, userData, loading,logout}}>
         {children}
     </AuthContext.Provider>
 }

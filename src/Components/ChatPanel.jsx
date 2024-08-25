@@ -4,7 +4,7 @@ import React from 'react'
 import { db } from "../../firebase";
 import { CircleFadingPlusIcon, MessageSquare, UserRoundIcon } from "lucide-react";
 import Profile from "./Profile";
-import UserCard from "./userCard";
+import UserCard from "./UserCard";
 
 function ChatPanel() {
     {/* list of users leke aane from your firebase */ }

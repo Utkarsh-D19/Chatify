@@ -21,8 +21,6 @@ if(!params.chatid)
     </section>
   );
 
-
-  // here you have thing the things
   
 
     return <h2>Chat : {params.chatid}</h2>  
