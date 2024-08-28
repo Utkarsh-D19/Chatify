@@ -1,7 +1,7 @@
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import React, { useContext, useEffect, useState } from "react";
 import { auth, db } from "../../firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 // 1. 
 const AuthContext = React.createContext();
@@ -31,11 +31,24 @@ function AuthWrapper({ children }) {
                         email,
                         name
                     });
+                    updateLastSeen(currentUser);
                 }
             }
             setLoading(false);
         })
     }, [])
+    const updateLastSeen = async (user) => {
+        const date = new Date();
+        const timeStamp = date.toLocaleString("en-US", {
+            hour: "numeric",
+            minute: "numeric",
+            hour12: true,
+        });
+        await updateDoc(doc(db, "users", user.uid), {
+            lastSeen: timeStamp,
+        });
+    };
+
     const logout =  () => {
         signOut(auth);
     };
