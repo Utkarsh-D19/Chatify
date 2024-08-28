@@ -1,7 +1,8 @@
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import React, { useContext, useEffect, useState } from "react";
-import { auth, db } from "../../firebase";
+import { auth, db, storage } from "../../firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 
 // 1. 
 const AuthContext = React.createContext();
@@ -14,15 +15,17 @@ export function useAuth() {
 function AuthWrapper({ children }) {
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isUploading, setIsUploading] = useState(false);
+    const [error, setError] = useState("");
     useEffect(() => {
         // check kr rahe ho if you have logged in before
         // kuch bhi change -> yha update ho jaayega 
-        onAuthStateChanged(auth, async (currentUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (currentUser) {
                 const docRef = doc(db, "users", currentUser?.uid);
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
-                    const { profile_pic, email, name ,status} = docSnap.data();
+                    const { profile_pic, email, name, status } = docSnap.data();
                     console.log("26", docSnap.data());
                     // context me jaake save kr dia hai user ka data
                     setUserData({
@@ -30,13 +33,17 @@ function AuthWrapper({ children }) {
                         profile_pic: profile_pic,
                         email,
                         name,
-                        status:status? status :""
+                        status: status ? status : ""
+
                     });
                     updateLastSeen(currentUser);
                 }
             }
             setLoading(false);
         })
+        return () => {
+            unsubscribe();
+        };
     }, [])
     const updateLastSeen = async (user) => {
         const date = new Date();
@@ -52,7 +59,7 @@ function AuthWrapper({ children }) {
 
     const updateName = async (name) => {
         await updateDoc(doc(db, "users", userData.id), {
-            displayName: name,
+            name: name,
         });
         setUserData({
             ...userData,
@@ -70,15 +77,50 @@ function AuthWrapper({ children }) {
         });
     };
 
+    const updatePhoto = async (img) => {
+        const storageRef = ref(storage, `profile/${userData.id}`);
+        const uploadTask = uploadBytesResumable(storageRef, img);
+
+        uploadTask.on(
+            "state_changed",
+            () => {
+                // on State Changed
+                setIsUploading(true);
+                setError(null);
+                console.log("upload started");
+            },
+            () => {
+                // on Error
+                setError("Unable to Upload!");
+                alert("Unable to Upload!");
+            },
+            () => {
+                // on Success
+                getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+                    await updateDoc(doc(db, "users", userData.id), {
+                        profile_pic: downloadURL,
+                    });
+                    setUserData({
+                        ...userData,
+                        profile_pic: downloadURL,
+                    });
+                    setIsUploading(false);
+                    setError(null);
+                });
+            }
+        );
+    };
+
     const logout = () => {
         signOut(auth);
     };
 
-    console.log("userData authcontext", userData);
     return <AuthContext.Provider value={{
         setUserData, userData, loading, logout,
         updateName,
         updateStatus,
+        updatePhoto,
+
     }}>
         {children}
     </AuthContext.Provider>
