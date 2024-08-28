@@ -5,6 +5,7 @@ import { db } from "../../firebase";
 import { CircleFadingPlusIcon, Loader2Icon, MessageSquare, SearchIcon, UserRoundIcon } from "lucide-react";
 import Profile from "./Profile";
 import UserCard from "./UserCard";
+import { useAuth } from "./AuthContext";
 
 function ChatPanel() {
     {/* list of users leke aane from your firebase */ }
@@ -12,6 +13,7 @@ function ChatPanel() {
     const [isLoading, setLoading] = useState(true);
     const [showProfile, setShowProfile] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const { userData } = useAuth();
 
 
     useEffect(() => {
@@ -30,7 +32,7 @@ function ChatPanel() {
     let filterdUsers = users;
     if (searchQuery) {
         // filter chats based on search query
-         filterdUsers = users.filter((user) =>
+        filterdUsers = users.filter((user) =>
             user.userData.name?.toLowerCase()?.includes(searchQuery?.toLowerCase())
         );
     }
@@ -49,7 +51,7 @@ function ChatPanel() {
                     onClick={() => { setShowProfile(true) }}
                 >
                     <img
-                        src={"/default-user.png"}
+                        src={userData.profile_pic||"/default-user.png"}
                         alt="profile picture"
                         className="w-10 h-10 rounded-full object-cover"
                     />
@@ -67,7 +69,7 @@ function ChatPanel() {
             {
                 isLoading ? <div className="h-full w-full flex justify-center items-center"><Loader2Icon className="w-10 h-10 animate-spin" /> </div> :
 
-                    <div className="bg-white dark:bg-chat-bg py-2 px-3">
+                    <div className="bg-white py-2 px-3">
                         {/* Search Bar  */}
                         <div className="bg-background flex items-center gap-4 px-3 py-2 rounded-lg">
                             <SearchIcon className="w-4 h-4" />
