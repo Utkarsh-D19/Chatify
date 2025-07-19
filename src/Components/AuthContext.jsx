@@ -4,6 +4,7 @@ import { auth, db, storage } from "../../firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 
+const vr = 10;
 // 1. 
 const AuthContext = React.createContext();
 // hook
